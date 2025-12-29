@@ -1,0 +1,11 @@
+# Build directories
+msdos-build/
+bootable/extract/
+bootable/mnt/
+mnt_fd/
+
+# Downloaded archives
+*.zip
+
+# Extracted driver collections (keep individual drivers in drivers/)
+network-drivers/pktdrv/
