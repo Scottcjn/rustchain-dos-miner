@@ -4,19 +4,35 @@
 
 *"Every vintage computer has historical potential"*
 
-## Bootable Disk Image
+## Bootable Disk Images
 
-**Download:** `rustchain-dos-miner.img` (32MB FreeDOS image)
+Two versions available - both contain RustChain miner source code:
 
-Boot from this image on any vintage PC. Contains:
-- FreeDOS 1.3 base system
-- RustChain miner source code (C:\RUSTCHN\)
-- Auto-start welcome script
+### FreeDOS Edition (Recommended)
+**File:** `rustchain-dos-miner.img` (32MB)
 
-To use:
-1. Write image to USB/CF card: `dd if=rustchain-dos-miner.img of=/dev/sdX`
-2. Boot vintage PC from the media
-3. Type `MINER` to see instructions
+- FreeDOS 1.3 base system (fully bootable)
+- Best compatibility with vintage hardware
+- Source code in `C:\RUSTCHN\`
+
+### MS-DOS Edition (Authentic)
+**File:** `rustchain-msdos.img` (32MB)
+
+- Genuine MS-DOS 4.0 (MIT licensed, open source since April 2024)
+- IBMBIO.COM, IBMDOS.COM, COMMAND.COM from Microsoft sources
+- Source code in `C:\RUSTCHN\`
+- Note: May require SYS command to install boot sector
+
+### Installation
+```bash
+# Write to USB/CF card
+dd if=rustchain-dos-miner.img of=/dev/sdX bs=4M
+
+# Or for MS-DOS version
+dd if=rustchain-msdos.img of=/dev/sdX bs=4M
+```
+
+Boot vintage PC and type `MINER` for instructions
 
 ## Features
 
@@ -101,4 +117,13 @@ Transfer this file to a networked computer to submit.
 
 ## License
 
-Part of RustChain - Elyan Labs 2025
+- **RustChain Miner:** Part of RustChain - Elyan Labs 2025
+- **MS-DOS 4.0:** Microsoft Corporation - MIT License (open sourced April 2024)
+- **FreeDOS:** FreeDOS Project - GPL
+
+### MS-DOS Source
+The MS-DOS edition uses genuine Microsoft source code from:
+https://github.com/microsoft/MS-DOS
+
+Microsoft open-sourced MS-DOS 4.0 in April 2024 under the MIT license,
+allowing redistribution and modification for any purpose.
