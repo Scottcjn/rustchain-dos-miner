@@ -4,6 +4,20 @@
 
 *"Every vintage computer has historical potential"*
 
+## Bootable Disk Image
+
+**Download:** `rustchain-dos-miner.img` (32MB FreeDOS image)
+
+Boot from this image on any vintage PC. Contains:
+- FreeDOS 1.3 base system
+- RustChain miner source code (C:\RUSTCHN\)
+- Auto-start welcome script
+
+To use:
+1. Write image to USB/CF card: `dd if=rustchain-dos-miner.img of=/dev/sdX`
+2. Boot vintage PC from the media
+3. Type `MINER` to see instructions
+
 ## Features
 
 - **Auto-wallet generation** from hardware entropy
