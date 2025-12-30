@@ -1,0 +1,124 @@
+================================================================
+ RUSTCHAIN DOS MINER - NETWORK SETUP GUIDE
+================================================================
+
+REQUIRED COMPONENTS:
+  1. Packet driver for your network card
+  2. mTCP TCP/IP stack
+  3. Network configuration file (MTCP.CFG)
+
+================================================================
+STEP 1: INSTALL PACKET DRIVER
+================================================================
+
+Load the packet driver for your NIC before running the miner.
+
+COMMON PACKET DRIVERS:
+  NE2000.COM 0x60 3 0x300    - NE2000 compatible (IRQ 3, I/O 300h)
+  3C509.COM 0x60             - 3Com 3C509
+  SMC_WD.COM 0x60 2 0x280    - SMC/WD cards
+  RTSPKT.COM 0x60            - Realtek RTL8139 (newer systems)
+
+Example:
+  C:\DRIVERS\NE2000.COM 0x60 3 0x300
+
+The packet driver uses interrupt 0x60 by default.
+
+================================================================
+STEP 2: CREATE MTCP.CFG
+================================================================
+
+Create a file called MTCP.CFG with these settings:
+
+--- MTCP.CFG for DHCP (automatic IP) ---
+PACKETINT 0x60
+HOSTNAME DOSMINER
+
+--- MTCP.CFG for Static IP ---
+PACKETINT 0x60
+HOSTNAME DOSMINER
+IPADDR 192.168.1.100
+NETMASK 255.255.255.0
+GATEWAY 192.168.1.1
+NAMESERVER 8.8.8.8
+
+================================================================
+STEP 3: SET ENVIRONMENT VARIABLE
+================================================================
+
+Tell mTCP where to find the config:
+  SET MTCPCFG=C:\MTCP.CFG
+
+================================================================
+STEP 4: GET IP ADDRESS (DHCP)
+================================================================
+
+If using DHCP, run:
+  DHCP.EXE
+
+This will get an IP address from your router.
+
+================================================================
+STEP 5: TEST CONNECTION
+================================================================
+
+Test connectivity to RustChain node:
+  PING.EXE 50.28.86.131
+
+If you see replies, networking is working!
+
+================================================================
+STEP 6: RUN THE MINER
+================================================================
+
+Now run the RustChain miner:
+  RTCMINE.BAT
+
+This will:
+  1. Run 7-layer anti-cheat detection
+  2. Generate wallet from hardware entropy
+  3. Submit attestation to RustChain nodes
+
+================================================================
+RUSTCHAIN NODE ADDRESSES (LOCKED - CANNOT BE CHANGED)
+================================================================
+
+Primary:   50.28.86.131:8088
+Secondary: 50.28.86.153:8088
+Node 3:    76.8.228.245:8099
+
+These are the ONLY addresses the miner will connect to.
+This is a security feature to prevent tampering.
+
+================================================================
+AUTOEXEC.BAT EXAMPLE
+================================================================
+
+Add these lines to AUTOEXEC.BAT for automatic startup:
+
+@ECHO OFF
+LH C:\DRIVERS\NE2000.COM 0x60 3 0x300
+SET MTCPCFG=C:\MTCP.CFG
+DHCP
+CD C:\RUSTCHAIN
+RTCMINE
+
+================================================================
+TROUBLESHOOTING
+================================================================
+
+"Packet driver not found"
+  - Make sure packet driver is loaded before mTCP tools
+  - Check IRQ and I/O address match your card
+
+"DHCP timeout"
+  - Check network cable
+  - Verify packet driver loaded correctly
+  - Try static IP instead
+
+"Cannot connect to node"
+  - Check gateway/router settings
+  - Verify DNS is working: DNSTEST www.google.com
+  - Try: HTGET http://50.28.86.131:8088/health
+
+================================================================

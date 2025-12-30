@@ -1,0 +1,5 @@
+HTTPSERV has ben excluded from this package. The source is not available at this time and
+is required for the program to be included with the FreeDOS release. 
+
+The full version of mTCP (including HTTPSERV) can be obtained from developer's website at
+http://www.brutman.com/mTCP/mTCP.html

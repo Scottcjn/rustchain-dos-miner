@@ -9,3 +9,20 @@ mnt_fd/
 
 # Extracted driver collections (keep individual drivers in drivers/)
 network-drivers/pktdrv/
+
+# Generated test files
+ATTEST.TXT
+DETECT.TXT
+WALLET.TXT
+RESP*.TXT
+HEALTH.TXT
+
+# mTCP source and docs (large files)
+tcpip/SOURCE/
+tcpip/src/
+tcpip/APPINFO/
+tcpip/NET/mTCP/manual/
+tcpip/NET/mTCP/COPYING.TXT
+tcpip/NET/mTCP/netdrive.sys
+tcpip/NET/mTCP/services.bat
+tcpip/mtcp*.zip

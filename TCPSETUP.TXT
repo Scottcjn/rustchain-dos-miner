@@ -1,0 +1,280 @@
+================================================================
+      RUSTCHAIN DOS MINER - TCP/IP CONFIGURATION GUIDE
+                   Step-by-Step Setup
+================================================================
+
+This guide will help you connect your DOS miner to the
+RustChain network. Follow each step carefully.
+
+================================================================
+                    WHAT YOU NEED
+================================================================
+
+1. Network Interface Card (NIC):
+   - NE2000 compatible (most common for vintage PCs)
+   - 3Com 3C509
+   - SMC/Western Digital
+   - Intel EtherExpress
+   - Realtek RTL8139 (for Pentium-era PCs)
+
+2. Packet Driver for your NIC (included in DRIVERS folder)
+
+3. Network connection:
+   - Ethernet cable to router/switch
+   - Router with DHCP (automatic IP) or static IP info
+
+================================================================
+            STEP 1: IDENTIFY YOUR NETWORK CARD
+================================================================
+
+Run HWSCRAPE.COM to detect your network card:
+
+  C:\>HWSCRAPE
+
+Look under "ISA Bus Detection" for:
+  - NE2000 compatible: Found at 300h (or 320h, 340h, 360h)
+  - 3Com 3C509: Found
+  - Sound Blaster: (ignore, not network)
+  - COM ports: (serial, not ethernet)
+
+WRITE DOWN:
+  - Card type: _______________
+  - I/O Address: _____ (e.g., 300h)
+  - IRQ: _____ (usually 3, 5, 9, 10, or 11)
+
+================================================================
+           STEP 2: LOAD PACKET DRIVER
+================================================================
+
+Go to DRIVERS folder and load the correct driver:
+
+FOR NE2000 COMPATIBLE:
+  C:\>CD DRIVERS
+  C:\DRIVERS>NE2000.COM 0x60 3 0x300
+
+  Where: 0x60 = packet interrupt (always use this)
+         3 = IRQ number
+         0x300 = I/O address
+
+FOR 3COM 3C509:
+  C:\DRIVERS>3C509.COM 0x60
+
+FOR SMC/WD:
+  C:\DRIVERS>SMC_WD.COM 0x60 5 0x280
+
+You should see:
+  "Packet driver installed at interrupt 0x60"
+  "MAC address: XX:XX:XX:XX:XX:XX"
+
+If you see an error, check IRQ and I/O address.
+
+================================================================
+           STEP 3: CREATE CONFIG FILE
+================================================================
+
+Create MTCP.CFG with your network settings:
+
+OPTION A - DHCP (Automatic IP - Recommended):
+------------------------------------------
+Edit MTCP.CFG to contain ONLY these 2 lines:
+
+  PACKETINT 0x60
+  HOSTNAME DOSMINER
+
+OPTION B - Static IP:
+------------------------------------------
+Edit MTCP.CFG to contain:
+
+  PACKETINT 0x60
+  HOSTNAME DOSMINER
+  IPADDR 192.168.1.100
+  NETMASK 255.255.255.0
+  GATEWAY 192.168.1.1
+  NAMESERVER 8.8.8.8
+
+Replace with your actual network settings.
+
+To edit the file:
+  C:\>EDIT MTCP.CFG
+
+================================================================
+           STEP 4: SET ENVIRONMENT VARIABLE
+================================================================
+
+Tell the system where to find the config:
+
+  C:\>SET MTCPCFG=C:\MTCP.CFG
+
+To make this permanent, add to AUTOEXEC.BAT:
+  SET MTCPCFG=C:\MTCP.CFG
+
+================================================================
+           STEP 5: GET IP ADDRESS (DHCP Users)
+================================================================
+
+If using DHCP, run:
+
+  C:\>DHCP
+
+You should see:
+  "DHCP request sent..."
+  "IP Address: 192.168.1.xxx"
+  "Subnet Mask: 255.255.255.0"
+  "Gateway: 192.168.1.1"
+  "Lease obtained!"
+
+This writes your IP to MTCP.CFG automatically.
+
+================================================================
+           STEP 6: TEST CONNECTIVITY
+================================================================
+
+Test connection to RustChain primary node:
+
+  C:\>PING 50.28.86.131
+
+You should see:
+  "Reply from 50.28.86.131: bytes=32 time=XXms"
+
+If you see "Request timed out":
+  - Check cable connection
+  - Verify gateway is correct
+  - Try pinging your gateway first
+
+Test secondary node:
+  C:\>PING 50.28.86.153
+
+================================================================
+           STEP 7: RUN THE MINER
+================================================================
+
+Now you can run the full network miner:
+
+  C:\>RTCMINE
+
+This will:
+  1. Run 7-layer anti-cheat detection
+  2. Generate hardware fingerprint
+  3. Create wallet from entropy
+  4. Connect to RustChain node
+  5. Submit attestation
+  6. Show reward status
+
+================================================================
+           AUTOMATIC STARTUP (AUTOEXEC.BAT)
+================================================================
+
+Add these lines to C:\AUTOEXEC.BAT for auto-start:
+
+  @ECHO OFF
+  LH C:\DRIVERS\NE2000.COM 0x60 3 0x300
+  SET MTCPCFG=C:\MTCP.CFG
+  DHCP
+  CD \
+  RTCMINE
+
+This will:
+  1. Load packet driver into high memory (LH)
+  2. Set config path
+  3. Get IP via DHCP
+  4. Start mining automatically
+
+================================================================
+           RUSTCHAIN NODES (4 NODES - HARDCODED)
+================================================================
+
+The miner can ONLY connect to official RustChain nodes:
+
+  NODE 1 (Primary):    50.28.86.131:8088   (LiquidWeb VPS)
+  NODE 2 (Secondary):  50.28.86.153:8088   (LiquidWeb VPS)
+  NODE 3 (Factorio):   76.8.228.245:8099   (Ryan's Proxmox)
+  NODE 4 (POWER8):     100.94.28.32:8099   (Tailscale)
+
+This is a security feature. The addresses are hardcoded
+and cannot be changed to prevent hijacking attacks.
+
+NOTE: POWER8 node (Node 4) is IBM POWER8 S824 server with
+      576GB RAM running RustChain attestation. Accessible
+      via Tailscale VPN only.
+
+================================================================
+           TROUBLESHOOTING
+================================================================
+
+PROBLEM: "Packet driver not found"
+SOLUTION:
+  - Load packet driver BEFORE running mTCP tools
+  - Verify driver loaded: should show MAC address
+  - Check IRQ conflict with other devices
+
+PROBLEM: "DHCP timeout"
+SOLUTION:
+  - Check ethernet cable
+  - Verify router has DHCP enabled
+  - Try static IP instead
+  - Check packet driver is correct for your card
+
+PROBLEM: "Cannot resolve hostname"
+SOLUTION:
+  - Add NAMESERVER to MTCP.CFG
+  - Use IP address directly instead of hostname
+
+PROBLEM: "Connection refused" or "No route to host"
+SOLUTION:
+  - Check gateway setting
+  - Ping gateway first: PING 192.168.1.1
+  - Verify internet connection on router
+
+PROBLEM: "Layers failed - emulation detected"
+SOLUTION:
+  - This is expected in DOSBox/emulators!
+  - For full rewards, run on REAL vintage hardware
+  - Emulated miners get 1e-9 (minimal) rewards
+
+================================================================
+           TESTING HTTP CONNECTION
+================================================================
+
+Test full HTTP connection to node:
+
+  C:\>HTGET -o HEALTH.TXT http://50.28.86.131:8088/health
+
+Then view the response:
+  C:\>TYPE HEALTH.TXT
+
+Should show: {"ok":true,"version":"2.2.1-rip200",...}
+
+================================================================
+           NETWORK CARD IRQ/IO REFERENCE
+================================================================
+
+Common settings for vintage network cards:
+
+Card            IRQ     I/O Base    Driver
+-----------     ---     --------    ----------------
+NE2000          3       0x300       NE2000.COM
+NE2000          5       0x320       NE2000.COM
+3Com 3C509      10      0x300       3C509.COM
+SMC Ultra       5       0x280       SMC_WD.COM
+Intel i82586    9       0x360       INTEL.COM
+Realtek 8139    11      0xC000      RTSPKT.COM
+
+To find your card's settings:
+  - Check jumpers on card (older cards)
+  - Run manufacturer's setup utility
+  - Check BIOS PnP settings (Pentium-era)
+
+================================================================
+                    QUICK REFERENCE
+================================================================
+
+LOAD DRIVER:    NE2000.COM 0x60 [IRQ] [IOADDR]
+CONFIG FILE:    SET MTCPCFG=C:\MTCP.CFG
+GET IP:         DHCP
+TEST PING:      PING 50.28.86.131
+RUN MINER:      RTCMINE
+
+================================================================
+     Questions? Submit issue on GitHub:
+     https://github.com/scottcjn/rustchain-dos-miner
+================================================================
