@@ -21,11 +21,27 @@ start:
     ; Show initial result
     call    show_status
 
-    ; Check if we should even try mining
+    ; Check emulation status (but KEEP RUNNING either way!)
     cmp     byte [layers_passed], 5
-    jb      .too_emulated
+    jae     .real_hardware
+    jmp     .emulator_detected
 
-    ; Main mining loop
+.real_hardware:
+    jmp     .mine_loop
+
+.emulator_detected:
+
+    ; Emulator detected - show warning but CONTINUE MINING
+    mov     ah, 09h
+    mov     dx, emu_warning
+    int     21h
+
+    ; Small delay to let keyboard settle
+    mov     cx, 0FFFFh
+.settle:
+    loop    .settle
+
+    ; Main mining loop (runs for BOTH real and emulated hardware)
 .mine_loop:
     ; Show mining animation frame
     call    show_mining_frame
@@ -57,21 +73,6 @@ start:
     cmp     al, 27          ; ESC
     je      .exit_mining
     jmp     .mine_loop
-
-.too_emulated:
-    mov     ah, 09h
-    mov     dx, emu_reject
-    int     21h
-
-    ; Still show what would happen
-    mov     ah, 09h
-    mov     dx, emu_info
-    int     21h
-
-    ; Wait for key
-    mov     ah, 01h
-    int     21h
-    jmp     .exit
 
 .exit_mining:
     mov     ah, 09h
@@ -717,10 +718,10 @@ do_attestation:
     push    cx
     push    dx
 
-    ; Generate wallet if not done
+    ; Load or generate wallet (PERSISTENT)
     cmp     byte [wallet_gen], 0
     jne     .have_wallet
-    call    generate_wallet
+    call    load_or_generate_wallet
     mov     byte [wallet_gen], 1
 .have_wallet:
 
@@ -856,6 +857,75 @@ show_attest_status:
     ret
 
 ;---------------------------------------
+; Load wallet from WALLET.TXT or generate new
+;---------------------------------------
+load_or_generate_wallet:
+    push    ax
+    push    bx
+    push    cx
+    push    dx
+
+    ; Try to open WALLET.TXT
+    mov     ah, 3Dh
+    mov     al, 0           ; Read-only
+    mov     dx, wallet_fn
+    int     21h
+    jc      .generate_new   ; File doesn't exist, generate new
+
+    ; File exists, read wallet
+    mov     bx, ax          ; File handle
+    mov     ah, 3Fh
+    mov     cx, 43          ; RTC + 40 hex chars
+    mov     dx, wallet
+    int     21h
+
+    ; Close file
+    mov     ah, 3Eh
+    int     21h
+
+    ; Add $ terminator
+    mov     byte [wallet+43], '$'
+
+    ; Show message
+    mov     ah, 09h
+    mov     dx, wallet_loaded_msg
+    int     21h
+    jmp     .done
+
+.generate_new:
+    ; Generate new wallet
+    call    generate_wallet
+
+    ; Save wallet to WALLET.TXT
+    mov     ah, 3Ch         ; Create file
+    mov     cx, 0
+    mov     dx, wallet_fn
+    int     21h
+    jc      .done           ; Failed to create
+
+    mov     bx, ax          ; File handle
+    mov     ah, 40h         ; Write
+    mov     cx, 43
+    mov     dx, wallet
+    int     21h
+
+    ; Close
+    mov     ah, 3Eh
+    int     21h
+
+    ; Show message
+    mov     ah, 09h
+    mov     dx, wallet_saved_msg
+    int     21h
+
+.done:
+    pop     dx
+    pop     cx
+    pop     bx
+    pop     ax
+    ret
+
+;---------------------------------------
 ; Generate wallet
 ;---------------------------------------
 generate_wallet:
@@ -951,6 +1021,22 @@ byte2hex:
     mov     [di], al
     inc     di
     pop     bx
+    pop     ax
+    ret
+
+;---------------------------------------
+; Clear keyboard buffer
+;---------------------------------------
+clear_keyboard_buffer:
+    push    ax
+.clear_loop:
+    mov     ah, 01h         ; Check if key available
+    int     16h
+    jz      .clear_done     ; No key, done
+    mov     ah, 00h         ; Read and discard key
+    int     16h
+    jmp     .clear_loop
+.clear_done:
     pop     ax
     ret
 
@@ -1083,25 +1169,16 @@ of7_str:    db '/7', 13, 10, '$'
 ent_lbl:    db '  Entropy Score: $'
 bits_str:   db ' bits', 13, 10, '$'
 
-emu_reject:
+emu_warning:
     db 13, 10
     db ' ================================================================', 13, 10
-    db '  EMULATION DETECTED - MINING REJECTED', 13, 10
+    db '  EMULATION DETECTED - MINING WITH 1e-9 MULTIPLIER', 13, 10
     db ' ================================================================', 13, 10
-    db 13, 10
-    db '  Your system failed too many anti-cheat checks.', 13, 10
-    db '  Emulated/virtualized systems receive 1e-9 rewards.', 13, 10
-    db 13, 10
-    db '  To earn full Proof of Antiquity rewards:', 13, 10
-    db '  - Run on REAL vintage hardware (8086-Pentium)', 13, 10
-    db '  - No VMs, emulators, or hypervisors', 13, 10
+    db '  Your system failed anti-cheat checks.', 13, 10
+    db '  Mining continues but rewards = 1 billionth normal.', 13, 10
+    db '  For full rewards: run on REAL vintage hardware!', 13, 10
+    db ' ================================================================', 13, 10
     db 13, 10, '$'
-
-emu_info:
-    db '  Your attestation has been saved to ATTEST.TXT', 13, 10
-    db '  Submit manually to see your (minimal) reward.', 13, 10
-    db 13, 10
-    db '  Press any key to exit...', 13, 10, '$'
 
 frame0:
     db '    o/      ', 13, 10
@@ -1137,6 +1214,10 @@ hexch:      db '0123456789abcdef'
 crlf:       db 13, 10
 
 attest_fn:  db 'ATTEST.TXT', 0
+wallet_fn:  db 'WALLET.TXT', 0
+
+wallet_loaded_msg:  db '  [*] Loaded wallet from WALLET.TXT', 13, 10, '$'
+wallet_saved_msg:   db '  [*] Generated new wallet, saved to WALLET.TXT', 13, 10, '$'
 att_hdr:    db 'RUSTCHAIN_ATTESTATION_V1', 13, 10
             db 'NODE=https://50.28.86.131', 13, 10
             db 'WALLET='
