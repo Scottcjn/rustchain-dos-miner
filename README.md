@@ -1,3 +1,5 @@
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![DOS](https://img.shields.io/badge/DOS-8086%2F286%2F386-blue)](https://github.com/Scottcjn/rustchain-dos-miner) [![Retro](https://img.shields.io/badge/Retro-Computing-orange)](https://github.com/Scottcjn/rustchain-dos-miner)
+
 # RustChain DOS Miner - "Fossil Edition"
 
 **For 8086/286/386/486/Pentium DOS systems**
