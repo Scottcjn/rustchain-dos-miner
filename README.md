@@ -21,7 +21,7 @@ Two versions available - both contain RustChain miner source code:
 ### MS-DOS Edition (Authentic)
 **File:** `rustchain-msdos.img` (32MB)
 
-- Genuine MS-DOS 4.0 (MIT licensed, open source since April 2024)
+- Genuine MS-DOS 4.0 (MIT licensed, open source since March 2014)
 - IBMBIO.COM, IBMDOS.COM, COMMAND.COM from Microsoft sources
 - Source code in `C:\RUSTCHN\`
 - Note: May require SYS command to install boot sector
@@ -121,12 +121,12 @@ Transfer this file to a networked computer to submit.
 ## License
 
 - **RustChain Miner:** Part of RustChain - Elyan Labs 2025
-- **MS-DOS 4.0:** Microsoft Corporation - MIT License (open sourced April 2024)
+- **MS-DOS 4.0:** Microsoft Corporation - MIT License (open sourced March 2014)
 - **FreeDOS:** FreeDOS Project - GPL
 
 ### MS-DOS Source
 The MS-DOS edition uses genuine Microsoft source code from:
 https://github.com/microsoft/MS-DOS
 
-Microsoft open-sourced MS-DOS 4.0 in April 2024 under the MIT license,
+Microsoft open-sourced MS-DOS 4.0 in March 2014 under the MIT license,
 allowing redistribution and modification for any purpose.
