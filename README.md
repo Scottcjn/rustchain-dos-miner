@@ -130,3 +130,11 @@ https://github.com/microsoft/MS-DOS
 
 Microsoft open-sourced MS-DOS 4.0 in April 2024 under the MIT license,
 allowing redistribution and modification for any purpose.
+
+---
+
+### Part of the Elyan Labs Ecosystem
+
+- [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
+- [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
+- [GitHub](https://github.com/Scottcjn)
