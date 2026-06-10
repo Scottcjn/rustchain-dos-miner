@@ -59,8 +59,6 @@ Boot vintage PC and type `MINER` for instructions
 - **Watt-32** library for networking
 - Or **Turbo C** for 16-bit real mode (limited features)
 
-## Compilation
-
 ```bash
 # With DJGPP + Watt-32
 gcc -o miner.exe rustchain_dos_miner.c -lwatt
