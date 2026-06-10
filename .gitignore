@@ -26,3 +26,6 @@ tcpip/NET/mTCP/COPYING.TXT
 tcpip/NET/mTCP/netdrive.sys
 tcpip/NET/mTCP/services.bat
 tcpip/mtcp*.zip
+
+*.img
+*.log
